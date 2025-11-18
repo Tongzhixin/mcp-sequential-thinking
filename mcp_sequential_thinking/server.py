@@ -22,7 +22,13 @@ except ImportError:
 logger = configure_logging("sequential-thinking.server")
 
 
-mcp = FastMCP("sequential-thinking")
+mcp = FastMCP(
+    "sequential-thinking",
+    auth=None,  # 明确禁用认证！
+    host="0.0.0.0",
+    port=3001,
+    streamable_http_path="/mcp",
+)
 
 storage_dir = os.environ.get("MCP_STORAGE_DIR", None)
 storage = ThoughtStorage(storage_dir)
@@ -218,23 +224,49 @@ def import_session(file_path: str) -> dict:
 
 def main():
     """Entry point for the MCP server."""
-    logger.info("Starting Sequential Thinking MCP server")
+#     import argparse
+    
+#     parser = argparse.ArgumentParser(
+#         description="Sequential Thinking MCP Server",
+#         formatter_class=argparse.RawDescriptionHelpFormatter,
+#         epilog="""
+# Examples:
+#   # Start in stdio mode (default)
+#   python -m mcp_sequential_thinking.server
+  
+#   # Start in HTTP mode
+#   python -m mcp_sequential_thinking.server --transport http --port 8000
+#         """
+#     )
+#     parser.add_argument(
+#         "--transport",
+#         choices=["stdio", "http"],
+#         default="stdio",
+#         help="Transport mode (default: stdio)"
+#     )
+#     parser.add_argument(
+#         "--port",
+#         type=int,
+#         default=8000,
+#         help="Port for HTTP mode (default: 8000)"
+#     )
+#     parser.add_argument(
+#         "--path",
+#         default="/mcp",
+#         help="Path for HTTP mode (default: /mcp)"
+#     )
+    
+    # args = parser.parse_args()
+    
+    # logger.info("="*60)
+    # logger.info("🚀 Starting Sequential Thinking MCP Server")
+    # logger.info("="*60)
+    # logger.info(f"📦 Transport mode: {args.transport}")
+    # logger.info(f"📁 Storage directory: {storage_dir or 'default'}")
+    
 
-    # Ensure UTF-8 encoding for stdin/stdout
-    if hasattr(sys.stdout, 'buffer') and sys.stdout.encoding != 'utf-8':
-        import io
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
-    if hasattr(sys.stdin, 'buffer') and sys.stdin.encoding != 'utf-8':
-        import io
-        sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', line_buffering=True)
-
-    # Flush stdout to ensure no buffered content remains
-    sys.stdout.flush()
-
-    # Run the MCP server
-    mcp.run()
-
-
+    mcp.run(transport="streamable-http")
+        
 if __name__ == "__main__":
     # When running the script directly, ensure we're in the right directory
     import os
